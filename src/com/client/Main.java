@@ -6,6 +6,8 @@ import javax.naming.NamingException;
 
 import com.model.Funcionalidad;
 import com.model.Rol;
+import com.model.Usuario;
+import com.service.FuncionalidadBeanRemote;
 import com.service.IUsuarioService;
 import com.service.RolBeanRemote;
 
@@ -18,51 +20,69 @@ public class Main {
 	private static IUsuarioService usuarioService;
 	@EJB
 	private static RolBeanRemote rolBeanRemote;
+	@EJB
+	private static FuncionalidadBeanRemote funcionalidadBeanRemote;
 
 	
 	public static void main(String[] args) {
 		try {
-			System.out.println("ACA SI");
 			InitialContext initialContext = new InitialContext();
 			usuarioService = (IUsuarioService) initialContext.lookup("ejb:/GestionUsuarios/UsuarioService!com.service.IUsuarioService");
 			rolBeanRemote = (RolBeanRemote) initialContext.lookup("ejb:/GestionUsuarios/RolBean!com.service.RolBeanRemote");
+			funcionalidadBeanRemote = (FuncionalidadBeanRemote) initialContext.lookup("ejb:/GestionUsuarios/FuncionalidadBean!com.service.FuncionalidadBeanRemote");
 
-			Rol rol = new Rol(null, "Analista", "Descr 1");
-			Rol rol2 = new Rol(null, "Estudiante", "Descr 2");
-//
-			Set<Funcionalidad> funcionalidades = new HashSet<Funcionalidad>();
-			funcionalidades.add(new Funcionalidad(null, "func1", "func-desc1"));
-			funcionalidades.add(new Funcionalidad(null, "func2", "func-desc2"));
-			
-			rol.setFuncionalidades(funcionalidades);
-			
-			Set<Funcionalidad> funcionalidades2 = new HashSet<Funcionalidad>();
-			funcionalidades2.add(new Funcionalidad(null, "func3", "func-desc3"));
-			funcionalidades2.add(new Funcionalidad(null, "func4", "func-desc4"));
-			System.out.println(rolBeanRemote);
-//
-			rolBeanRemote.test();
-			System.out.println("va pasando...");
-			System.out.println(rolBeanRemote.existePorId(1L));
-			System.out.println(rol);
-			Rol rol4 = new Rol(null, "Test", "Test");
-			rolBeanRemote.actualizar(rol4);
-//			System.out.println(rolBeanRemote.crear(rol));
-//			rolBeanRemote.crear(rol2);
+//			createRolConFuncionalidadExistente();
+
+			createUsuarioConRolExistente();
+
 
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
 			System.out.println("asdasdasdasdasdasdasd");
 			e.printStackTrace();
 		} catch (Exception e) {
 			System.out.println("TEST TEST TEST: " + e.getMessage());
-			System.out.println("TEST 2 2: " + e.getClass());
 			e.printStackTrace();
 		}
 
-		System.out.println("test");
-		System.out.println(usuarioService);
-//		System.out.println(usuarioService.obtener(1L));
+		System.out.println("test final metodo main");
+	}
+
+	public static void createRolConFuncionalidadExistente() {
+		try {
+			Rol rol = new Rol(null, "Funcionalidad Existente", "Funcionalidad Existente");
+			Set<Funcionalidad> funcionalidades = new HashSet<>();
+			funcionalidades.add(funcionalidadBeanRemote.obtener(1L));
+			funcionalidades.add(funcionalidadBeanRemote.obtener(2L));
+			rol.setFuncionalidades(funcionalidades);
+			rolBeanRemote.crear(rol);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createUsuarioConRolExistente() {
+		try {
+			Rol rol = rolBeanRemote.obtener(1L);
+			System.out.println(rol);
+			Usuario usuario = new Usuario(null, "Hernan test", "Testbg", "123123", "asdasdasd", "asdasd@asdasd.com", rol);
+			usuarioService.crear(usuario);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createUsuarioConNuevoRol() {
+		try {
+			Rol rol = new Rol(null, "Rol con usuario", "Rol con usuario descr");
+			Set<Funcionalidad> funcionalidades = new HashSet<>();
+			funcionalidades.add(funcionalidadBeanRemote.obtener(1L));
+			rol.setFuncionalidades(funcionalidades);
+			Usuario usuario = new Usuario(null, "Hernan segundo", "Segundo", "65767867", "bmnnbmnm", "nmbnmbnm@asdasd.com", rol);
+
+			usuarioService.crear(usuario);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
